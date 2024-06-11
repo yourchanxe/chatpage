@@ -1,21 +1,46 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ko">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Simple Chat</title>
-    <link rel="stylesheet" href="styles.css">
+<meta charset="UTF-8">
+<title>방문자 로그</title>
+<script>
+// 방문자 로그를 저장할 배열
+var visitorLog = [];
+
+function addVisitor() {
+  // 사용자 입력을 받음
+  var visitorName = document.getElementById('visitorName').value;
+  var visitDate = new Date();
+  
+  // 로그에 추가
+  visitorLog.push({ name: visitorName, date: visitDate });
+
+  // 로그를 화면에 표시
+  displayLog();
+}
+
+function displayLog() {
+  var logElement = document.getElementById('log');
+  logElement.innerHTML = ''; // 로그를 초기화
+
+  // 모든 방문 기록을 화면에 추가
+  visitorLog.forEach(function(visitor) {
+    var entry = document.createElement('p');
+    entry.textContent = '이름: ' + visitor.name + ', 방문 시간: ' + visitor.date.toLocaleString();
+    logElement.appendChild(entry);
+  });
+}
+</script>
 </head>
 <body>
-    <div id="chat-container">
-        <div id="chat-box">
-            <!-- Messages will be appended here -->
-        </div>
-        <form id="chat-form">
-            <input type="text" id="chat-input" placeholder="Type a message..." required>
-            <button type="submit">Send</button>
-        </form>
-    </div>
-    <script src="script.js"></script>
+
+<h2>방문자 로그</h2>
+
+<label for="visitorName">이름:</label>
+<input type="text" id="visitorName" placeholder="여기에 이름을 입력하세요">
+<button onclick="addVisitor()">방문 기록 추가</button>
+
+<div id="log"></div>
+
 </body>
 </html>
