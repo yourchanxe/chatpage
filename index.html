@@ -2,45 +2,103 @@
 <html lang="ko">
 <head>
 <meta charset="UTF-8">
-<title>방문자 로그</title>
-<script>
-// 방문자 로그를 저장할 배열
-var visitorLog = [];
-
-function addVisitor() {
-  // 사용자 입력을 받음
-  var visitorName = document.getElementById('visitorName').value;
-  var visitDate = new Date();
-  
-  // 로그에 추가
-  visitorLog.push({ name: visitorName, date: visitDate });
-
-  // 로그를 화면에 표시
-  displayLog();
-}
-
-function displayLog() {
-  var logElement = document.getElementById('log');
-  logElement.innerHTML = ''; // 로그를 초기화
-
-  // 모든 방문 기록을 화면에 추가
-  visitorLog.forEach(function(visitor) {
-    var entry = document.createElement('p');
-    entry.textContent = '이름: ' + visitor.name + ', 방문 시간: ' + visitor.date.toLocaleString();
-    logElement.appendChild(entry);
-  });
-}
-</script>
+<title>저장 기능이 있는 드로잉 앱</title>
+<style>
+  body {
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    height: 100vh;
+    background-color: #f7f7f7;
+  }
+  #drawingCanvas {
+    border: 1px solid #000;
+    margin-top: 10px;
+  }
+  .toolbar {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 5px;
+  }
+  button {
+    margin: 0 5px;
+  }
+</style>
 </head>
 <body>
-
-<h2>방문자 로그</h2>
-
-<label for="visitorName">이름:</label>
-<input type="text" id="visitorName" placeholder="여기에 이름을 입력하세요">
-<button onclick="addVisitor()">방문 기록 추가</button>
-
-<div id="log"></div>
-
+<div class="toolbar">
+  <label for="brushSize">브러시 크기:</label>
+  <input type="range" id="brushSize" min="1" max="10" value="5">
+  <label for="colors">색상 선택:</label>
+  <input type="color" id="colors">
+  <button id="clearCanvas">지우기</button>
+</div>
+<canvas id="drawingCanvas" width="800" height="600"></canvas>
+<script>
+  const canvas = document.getElementById('drawingCanvas');
+  const ctx = canvas.getContext('2d');
+  const brushSize = document.getElementById('brushSize');
+  const colors = document.getElementById('colors');
+  const clearCanvas = document.getElementById('clearCanvas');
+  
+  let drawing = false;
+  
+  function startDrawing(e) {
+    drawing = true;
+    draw(e);
+  }
+  
+  function endDrawing() {
+    drawing = false;
+    ctx.beginPath();
+  }
+  
+  function draw(e) {
+    if (!drawing) return;
+    
+    ctx.lineWidth = brushSize.value;
+    ctx.lineCap = 'round';
+    ctx.strokeStyle = colors.value;
+    
+    ctx.lineTo(e.clientX - canvas.offsetLeft, e.clientY - canvas.offsetTop);
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.moveTo(e.clientX - canvas.offsetLeft, e.clientY - canvas.offsetTop);
+  }
+  
+  function clearTheCanvas() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+  }
+  
+  // 캔버스 상태를 저장하는 함수
+  function saveCanvas() {
+    localStorage.setItem('savedCanvas', canvas.toDataURL());
+  }
+  
+  // 캔버스 상태를 불러오는 함수
+  function loadCanvas() {
+    const savedCanvas = localStorage.getItem('savedCanvas');
+    if (savedCanvas) {
+      const img = new Image();
+      img.onload = function() {
+        ctx.drawImage(img, 0, 0);
+      };
+      img.src = savedCanvas;
+    }
+  }
+  
+  canvas.addEventListener('mousedown', startDrawing);
+  canvas.addEventListener('mouseup', endDrawing);
+  canvas.addEventListener('mousemove', draw);
+  clearCanvas.addEventListener('click', clearTheCanvas);
+  
+  // 페이지 로드 시 캔버스 불러오기
+  window.onload = loadCanvas;
+  // 캔버스 상태 저장
+  window.onbeforeunload = saveCanvas;
+  
+</script>
 </body>
 </html>
