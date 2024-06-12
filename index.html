@@ -2,7 +2,7 @@
 <html lang="ko">
 <head>
 <meta charset="UTF-8">
-<title>배경없는 그림 그리기</title>
+<title>터치 지원 드로잉 앱</title>
 <style>
   body {
     margin: 0;
@@ -10,7 +10,7 @@
     display: flex;
     flex-direction: column;
     align-items: center;
-    height: 100vh;
+    min-height: 100vh;
     background-color: #f7f7f7;
   }
   #header {
@@ -19,6 +19,7 @@
     color: white;
     text-align: center;
     padding: 10px 0;
+    margin-bottom: 20px;
   }
   #drawingCanvas {
     border: 1px solid #000;
@@ -31,6 +32,27 @@
   }
   button {
     margin: 0 5px;
+  }
+  .footer {
+    width: 100%;
+    background-color: #333;
+    color: white;
+    text-align: center;
+    padding: 10px 0;
+    position: absolute;
+    bottom: 0;
+  }
+  .footer button {
+    background-color: #555;
+    color: white;
+    border: none;
+    padding: 10px 15px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 16px;
+    margin: 4px 2px;
+    cursor: pointer;
   }
 </style>
 </head>
@@ -45,6 +67,12 @@
   <button id="download">다운로드</button>
 </div>
 <canvas id="drawingCanvas" width="1000" height="800"></canvas>
+<div class="footer">
+  <button id="temp1">임시1</button>
+  <button onclick="location.href='temp2.html'">임시2</button>
+  <button onclick="location.href='temp3.html'">임시3</button>
+  <button id="saveLog">로그 저장</button>
+</div>
 <script>
   const canvas = document.getElementById('drawingCanvas');
   const ctx = canvas.getContext('2d');
@@ -52,29 +80,29 @@
   const colors = document.getElementById('colors');
   const clearCanvas = document.getElementById('clearCanvas');
   const downloadBtn = document.getElementById('download');
+  const saveLogBtn = document.getElementById('saveLog');
   
   let drawing = false;
   
   function startDrawing(e) {
-    e.preventDefault(); // 스크롤 방지
+    e.preventDefault();
     drawing = true;
     draw(e);
   }
   
   function endDrawing(e) {
-    e.preventDefault(); // 스크롤 방지
+    e.preventDefault();
     drawing = false;
     ctx.beginPath();
   }
   
   function draw(e) {
-    e.preventDefault(); // 스크롤 방지
+    e.preventDefault();
     if (!drawing) return;
     
     let x = e.clientX - canvas.offsetLeft;
     let y = e.clientY - canvas.offsetTop;
     
-    // 터치 이벤트를 위한 조건문
     if (e.touches) {
       x = e.touches[0].clientX - canvas.offsetLeft;
       y = e.touches[0].clientY - canvas.offsetTop;
@@ -94,7 +122,6 @@
     ctx.clearRect(0, 0, canvas.width, canvas.height);
   }
   
-  // 그림을 이미지 파일로 다운로드하는 함수
   function downloadImage() {
     const image = canvas.toDataURL('image/png').replace('image/png', 'image/octet-stream');
     const link = document.createElement('a');
@@ -103,12 +130,10 @@
     link.click();
   }
   
-  // 캔버스 상태를 저장하는 함수
   function saveCanvas() {
     localStorage.setItem('savedCanvas', canvas.toDataURL());
   }
   
-  // 캔버스 상태를 불러오는 함수
   function loadCanvas() {
     const savedCanvas = localStorage.getItem('savedCanvas');
     if (savedCanvas) {
@@ -120,22 +145,26 @@
     }
   }
   
-  // 마우스 이벤트 리스너
+  function saveVisitorLog() {
+    const log = JSON.parse(localStorage.getItem('visitorLog') || '[]');
+    const blob = new Blob([JSON.stringify(log, null, 2)], { type: 'application/json' });
+    const link = document.createElement('a');
+    link.download = 'visitorLog.json';
+    link.href = URL.createObjectURL(blob);
+    link.click();
+  }
+  
   canvas.addEventListener('mousedown', startDrawing);
   canvas.addEventListener('mouseup', endDrawing);
   canvas.addEventListener('mousemove', draw);
-  
-  // 터치 이벤트 리스너
   canvas.addEventListener('touchstart', startDrawing);
   canvas.addEventListener('touchend', endDrawing);
   canvas.addEventListener('touchmove', draw);
-  
   clearCanvas.addEventListener('click', clearTheCanvas);
   downloadBtn.addEventListener('click', downloadImage);
+  saveLogBtn.addEventListener('click', saveVisitorLog);
   
-  // 페이지 로드 시 캔버스 불러오기
   window.onload = loadCanvas;
-  // 캔버스 상태 저장
   window.onbeforeunload = saveCanvas;
   
 </script>
