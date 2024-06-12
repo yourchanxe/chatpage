@@ -2,7 +2,7 @@
 <html lang="ko">
 <head>
 <meta charset="UTF-8">
-<title>배경 없는 그림 그리기</title>
+<title>배경없는 그림 그리기</title>
 <style>
   body {
     margin: 0;
@@ -12,6 +12,13 @@
     align-items: center;
     height: 100vh;
     background-color: #f7f7f7;
+  }
+  #header {
+    width: 100%;
+    background-color: #333;
+    color: white;
+    text-align: center;
+    padding: 10px 0;
   }
   #drawingCanvas {
     border: 1px solid #000;
@@ -28,6 +35,7 @@
 </style>
 </head>
 <body>
+<div id="header">thisground.com</div>
 <div class="toolbar">
   <label for="brushSize">브러시 크기:</label>
   <input type="range" id="brushSize" min="1" max="10" value="5">
