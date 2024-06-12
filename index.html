@@ -2,7 +2,7 @@
 <html lang="ko">
 <head>
 <meta charset="UTF-8">
-<title>저장 기능이 있는 드로잉 앱</title>
+<title>다운로드 기능이 있는 드로잉 앱</title>
 <style>
   body {
     margin: 0;
@@ -34,14 +34,16 @@
   <label for="colors">색상 선택:</label>
   <input type="color" id="colors">
   <button id="clearCanvas">지우기</button>
+  <button id="download">다운로드</button>
 </div>
-<canvas id="drawingCanvas" width="800" height="600"></canvas>
+<canvas id="drawingCanvas" width="1000" height="800"></canvas>
 <script>
   const canvas = document.getElementById('drawingCanvas');
   const ctx = canvas.getContext('2d');
   const brushSize = document.getElementById('brushSize');
   const colors = document.getElementById('colors');
   const clearCanvas = document.getElementById('clearCanvas');
+  const downloadBtn = document.getElementById('download');
   
   let drawing = false;
   
@@ -58,18 +60,36 @@
   function draw(e) {
     if (!drawing) return;
     
+    let x = e.clientX - canvas.offsetLeft;
+    let y = e.clientY - canvas.offsetTop;
+    
+    // 터치 이벤트를 위한 조건문
+    if (e.touches) {
+      x = e.touches[0].clientX - canvas.offsetLeft;
+      y = e.touches[0].clientY - canvas.offsetTop;
+    }
+    
     ctx.lineWidth = brushSize.value;
     ctx.lineCap = 'round';
     ctx.strokeStyle = colors.value;
     
-    ctx.lineTo(e.clientX - canvas.offsetLeft, e.clientY - canvas.offsetTop);
+    ctx.lineTo(x, y);
     ctx.stroke();
     ctx.beginPath();
-    ctx.moveTo(e.clientX - canvas.offsetLeft, e.clientY - canvas.offsetTop);
+    ctx.moveTo(x, y);
   }
   
   function clearTheCanvas() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
+  }
+  
+  // 그림을 이미지 파일로 다운로드하는 함수
+  function downloadImage() {
+    const image = canvas.toDataURL('image/png').replace('image/png', 'image/octet-stream');
+    const link = document.createElement('a');
+    link.download = 'my-drawing.png';
+    link.href = image;
+    link.click();
   }
   
   // 캔버스 상태를 저장하는 함수
@@ -89,10 +109,18 @@
     }
   }
   
+  // 마우스 이벤트 리스너
   canvas.addEventListener('mousedown', startDrawing);
   canvas.addEventListener('mouseup', endDrawing);
   canvas.addEventListener('mousemove', draw);
+  
+  // 터치 이벤트 리스너
+  canvas.addEventListener('touchstart', startDrawing);
+  canvas.addEventListener('touchend', endDrawing);
+  canvas.addEventListener('touchmove', draw);
+  
   clearCanvas.addEventListener('click', clearTheCanvas);
+  downloadBtn.addEventListener('click', downloadImage);
   
   // 페이지 로드 시 캔버스 불러오기
   window.onload = loadCanvas;
